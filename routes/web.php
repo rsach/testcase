@@ -11,4 +11,4 @@
 |
  */
 
-Route::get('/api/convert/{serial}/{date}', 'SerialConverter@converter');
+// Route::get('/api/convert/{pattern}/{serial}/{date}', 'SerialConverter@converter');
