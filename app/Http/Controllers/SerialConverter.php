@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\UrlRequest;
+use Illuminate\Http\Request;
 use RS\Converter;
 use RS\Serial;
 
@@ -20,16 +20,18 @@ class SerialConverter extends Controller {
 	 *
 	 * @return     <json>                         ( json response of the processedSerial according to the 																		pattern)
 	 */
-	public function converter(UrlRequest $request) {
+	public function converter(Request $request) {
 
 		// validation
 		//
-		//
+		$this->validate($request, [
+			'pattern' => '[0-9]+',
+		]);
 
-		$num = $this->converter->formatRequest($request);
+		$processedSerial = $this->converter->formatRequest($request);
 
 		return response()->jsend(
-			$data = $num,
+			$data = $processedSerial,
 			$presenter = null,
 			$status = 'success',
 			$message = 'This is a Jsend Response ',
