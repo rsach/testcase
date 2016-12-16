@@ -23,19 +23,19 @@ class SerialConverter extends Controller {
 	public function converter(Request $request) {
 
 		// validation
-		//
-		$this->validate($request, [
-			'pattern' => '[0-9]+',
-		]);
 
-		$processedSerial = $this->converter->formatRequest($request);
+		$processedSerial = $this->converter->processResponse($request);
+
+		// if ($errors > 0) {
+		// 	$processedSerial = $errors;
+		// }
 
 		return response()->jsend(
-			$data = $processedSerial,
+			$data = $processedSerial->data,
 			$presenter = null,
-			$status = 'success',
-			$message = 'This is a Jsend Response ',
-			$code = 200
+			$status = $processedSerial->status,
+			$message = $processedSerial->message,
+			$code = $processedSerial->code
 		);
 
 	}

@@ -1,8 +1,16 @@
 <?php
 
 namespace RS;
+use RS\Error;
+use RS\ProcessedOutput;
+use RS\Serial;
 
 class Converter {
+
+	public function __construct(Error $error) {
+		$this->error = $error;
+
+	}
 
 	/**
 	 * { format Request from controller to prepare it for processing }
@@ -11,12 +19,25 @@ class Converter {
 	 *
 	 * @return     <string>  ( processed serial for controller  )
 	 */
-	public function formatRequest($request) {
+	public function processResponse($request) {
 
 		$ser = new Serial($request->pattern, $request->serial, $request->date);
-		$num = $this->processSerial($ser->pattern, $ser->serial);
 
-		return $num;
+		$processedResponse;
+
+		$err = $this->error->patternSerialValidation($ser->pattern, $ser->serial);
+		var_dump($err);
+
+		if (!$err) {
+			$processedResponse = new ProcessedOutput(null, "failed", "Pattern and Serial doesn't match according to the convention specified", 400);
+
+		} else {
+			$processedSerial = $this->processSerial($ser->pattern, $ser->serial);
+			$processedResponse = new ProcessedOutput($processedSerial, "success", "Pattern and serial convention is right", 200);
+
+		}
+
+		return $processedResponse;
 
 	}
 
