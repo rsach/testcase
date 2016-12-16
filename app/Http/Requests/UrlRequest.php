@@ -21,6 +21,9 @@ class UrlRequest extends FormRequest {
 	 */
 	public function rules() {
 		return [
+			'pattern' => '/dsadas/',
+			'serial' => '/\w/',
+			'date' => 'date',
 
 		];
 	}

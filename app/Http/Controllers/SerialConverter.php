@@ -18,9 +18,9 @@ class SerialConverter extends Controller {
 
 		// validation
 
-		$ser = new Serial($request->pattern, $request->serial, $request->date);
+		//$ser = new Serial($request->pattern, $request->serial, $request->date);
 
-		$num = $this->processSerial($ser->pattern, $ser->serial);
+		$num = $this->processSerial($request->pattern, $request->serial);
 
 		return response()->jsend(
 			$data = $num,
