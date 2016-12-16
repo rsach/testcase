@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace RS;
 
 class Serial {
 
@@ -10,4 +10,5 @@ class Serial {
 		$this->date = $date;
 
 	}
+
 }

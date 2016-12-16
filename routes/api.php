@@ -11,7 +11,7 @@
 |
  */
 
-Route::get('/convert/{pattern}/{serial}/{date}', 'SerialConverter@converter');
+Route::get('/convert/{pattern}/{serial}/{date}', 'SerialConverter@converter'); //->where('pattern', '[A-Z]+');
 
 Route::get('/{name?}', function ($name = 'John') {
 	return $name;
