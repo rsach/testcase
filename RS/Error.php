@@ -4,17 +4,16 @@ namespace RS;
 
 class Error {
 
-	public function patternSerialValidation($pattern, $serial) {
+	public function patternSerialValidation($formattedPattern, $serial) {
 
-		$flag = false;
+		//	$flag = false;
 
-		$pattern = preg_split("/[=>{}\s]+/", $pattern);
-		$prePattern = $pattern[0];
-		if (strpos($prePattern, ",")) {
-			$prePattern = preg_split("/,/", $prePattern);
-			$prePattern = $prePattern[0];
-		}
+		$flag = $this->patternValidationLogic($formattedPattern->prePattern, $serial);
 
+		return $flag;
+	}
+
+	public function patternValidationLogic($prePattern, $serial) {
 		if (strlen($prePattern) == strlen($serial)) {
 			$flag = true;
 
@@ -35,7 +34,7 @@ class Error {
 
 				if (!$flag) {
 
-					return false;
+					$flag = false;
 					break;
 				}
 			}
@@ -45,6 +44,12 @@ class Error {
 		}
 
 		return $flag;
+
+	}
+
+	public function dateValidationLogic($datePattern, $date) {
+		return false;
+
 	}
 
 }

@@ -2,7 +2,6 @@
 
 namespace RS;
 use RS\Error;
-use RS\ProcessedOutput;
 use RS\Serial;
 
 class Converter {
@@ -24,15 +23,19 @@ class Converter {
 		$ser = new Serial($request->pattern, $request->serial, $request->date);
 
 		$processedResponse;
+		$formattedPattern = $this->giveMeFormatPattern($request->pattern);
 
-		$err = $this->error->patternSerialValidation($ser->pattern, $ser->serial);
-		//var_dump($err);
+		$PatternConventionError = $this->error->patternSerialValidation($formattedPattern, $request->serial);
+		$dateConventionError = $this->error->dateValidationLogic($formattedPattern->date, $ser->date);
 
-		if (!$err) {
+		if (!$PatternConventionError) {
 			$processedResponse = new ProcessedOutput(null, "failed", "Pattern and Serial doesn't match according to the convention specified", 400);
 
+		} else if ($dateConventionError) {
+
 		} else {
-			$processedSerial = $this->processSerial($ser->pattern, $ser->serial);
+
+			$processedSerial = $this->processSerial($formattedPattern, $ser->serial);
 			$processedResponse = new ProcessedOutput($processedSerial, "success", "Pattern and serial convention is right", 200);
 
 		}
@@ -49,11 +52,11 @@ class Converter {
 	 *
 	 * @return     <string>  ( alter the serial according to the pre and post pattern )
 	 */
-	public function processSerial($pattern, $serial) {
+	public function processSerial($formattedPattern, $serial) {
 
-		$word = $this->splitPattern($pattern);
+		//$word = $this->splitPattern($pattern);
 
-		$count = $this->countSpecialCharacter($word);
+		$count = $this->countSpecialCharacter($formattedPattern);
 
 		$serial1 = str_split($serial);
 
@@ -61,11 +64,11 @@ class Converter {
 
 		foreach ($count[1] as $key => $value) {
 
-			$mod = array_merge($mod, $this->alterSerial($serial1, $word, $count, $key));
+			$mod = array_merge($mod, $this->alterSerial($serial1, $formattedPattern, $count, $key));
 
 		}
 
-		$serial = $this->splitPatternWithSpecialCharacter($word[1]);
+		$serial = $this->splitPatternWithSpecialCharacter($formattedPattern->postPattern);
 
 		$serial = $serial[0] . implode("", $mod);
 
@@ -79,16 +82,16 @@ class Converter {
 	 *
 	 * @return     <array>  Number of special character of pre and post pattern.
 	 */
-	public function countSpecialCharacter($word) {
+	public function countSpecialCharacter($formattedPattern) {
 
 		// counting serial number values
-		if (strpos($word[0], ",")) {
-			$pre = $this->splitPrePatternWithDate($word[0]);
+		// if (strpos($word[0], ",")) {
+		// 	$pre = $this->splitPrePatternWithDate($word[0]);
 
-		}
+		// }
 
-		$pre = $this->splitPatternWithSpecialCharacter($word[0]);
-		$post = $this->splitPatternWithSpecialCharacter($word[1]);
+		$pre = $this->splitPatternWithSpecialCharacter($formattedPattern->prePattern);
+		$post = $this->splitPatternWithSpecialCharacter($formattedPattern->postPattern);
 
 		$countPre = array_count_values(str_split($pre[1]));
 		$countPost = array_count_values(str_split($post[1]));
@@ -106,17 +109,14 @@ class Converter {
 	 *
 	 * @return     integer  The offset.
 	 */
-	public function calculateOffset($order, $start, $preCount, $postCount) {
+	public function calculateOffset($formattedPattern, $start, $preCount, $postCount) {
 		$offset = $start + ($preCount - $postCount);
 
-		if (count($order) > 2) {
-			if ($order[2] == 'ASC') {
-				$offset = $start;
+		if ($formattedPattern->order == 'ASC') {
+			$offset = $start;
 
-			} else if ($order[2] == 'DSC') {
-				$offset = $offset;
-
-			}
+		} else if ($formattedPattern->order == 'DSC') {
+			$offset = $offset;
 
 		}
 
@@ -133,11 +133,11 @@ class Converter {
 	 *
 	 * @return     <array>  ( it returns the processed serial for that special character )
 	 */
-	public function alterSerial($serial, $word, $count, $key) {
+	public function alterSerial($serial, $formattedPattern, $count, $key) {
 
-		$hashStart = strpos($word[0], $key);
+		$hashStart = strpos($formattedPattern->prePattern, $key);
 
-		$offset = $this->calculateOffset($word, $hashStart, $count[0][$key], $count[1][$key]);
+		$offset = $this->calculateOffset($formattedPattern, $hashStart, $count[0][$key], $count[1][$key]);
 
 		$mod = array_splice($serial, $offset, $count[1][$key]);
 
@@ -176,6 +176,34 @@ class Converter {
 	 */
 	public function splitPatternWithSpecialCharacter($word) {
 		return preg_split('/(?<=[A-Z])(?=\W)/', $word);
+	}
+
+	public function giveMeFormatPattern($pattern) {
+		$pattern = $this->splitPattern($pattern);
+		$prePattern = $pattern[0];
+		$date = 'not a date';
+		$order = 'DSC';
+		if (strpos($prePattern, ",")) {
+
+			$prePatternDateSplit = $this->splitPrePatternWithDate($pattern[0]);
+			$prePattern = $prePatternDateSplit[0];
+			$date = $prePatternDateSplit[1];
+
+		} else {
+
+			$prePattern = trim($pattern[0]);
+
+		}
+
+		if (count($pattern) > 2) {
+			$order = $pattern[2];
+
+		}
+
+		$postPattern = trim($pattern[1]);
+
+		return new FormattedPattern($prePattern, $postPattern, $date, $order);
+
 	}
 
 }
