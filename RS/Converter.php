@@ -25,6 +25,8 @@ class Converter {
 
 		$formattedSerial = $this->giveMeFormatSerial($request->serial);
 
+		//var_dump($formattedPattern);
+
 		$PatternConventionError = $this->error->patternSerialValidation($formattedPattern, $formattedSerial->serial);
 
 		$dateConventionError = $this->error->dateValidationLogic($formattedPattern->date, $formattedSerial->date);
@@ -32,7 +34,9 @@ class Converter {
 		if (!$PatternConventionError) {
 			$processedResponse = new ProcessedOutput(null, "failed", "Pattern and Serial doesn't match according to the convention specified", 400);
 
-		} else if ($dateConventionError) {
+		} else if (!$dateConventionError) {
+
+			$processedResponse = new ProcessedOutput(null, "failed", "datePattern and date convention doesn't match", 400);
 
 		} else {
 
@@ -189,6 +193,10 @@ class Converter {
 			$prePatternDateSplit = $this->splitPrePatternWithDate($pattern[0]);
 			$prePattern = $prePatternDateSplit[0];
 			$date = $prePatternDateSplit[1];
+			$date = trim($date);
+
+			$date = preg_split('/date:/', $date);
+			$date = trim($date[1]);
 
 		} else {
 
@@ -215,9 +223,9 @@ class Converter {
 
 			$serialUrl = $this->splitPrePatternWithDate($serialUrl);
 			$serial = $serialUrl[0];
-			$serial = $trim($serial);
+			$serial = trim($serial);
 			$date = $serialUrl[1];
-			$date = $trim($date);
+			$date = trim($date);
 
 		} else {
 

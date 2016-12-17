@@ -48,7 +48,20 @@ class Error {
 	}
 
 	public function dateValidationLogic($datePattern, $date) {
-		return false;
+		$flag = false;
+		for ($i = 0; $i < strlen($date); $i++) {
+			if ($datePattern[$i] == $date[$i]) {
+				$flag = true;
+
+			} else if ($datePattern[$i] == "?") {
+				$flag = preg_match("/\d/", $date[$i]);
+			} else {
+				$flag = false;
+
+			}
+		}
+
+		return $flag;
 
 	}
 
