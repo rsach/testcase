@@ -26,7 +26,7 @@ class Converter {
 		$processedResponse;
 
 		$err = $this->error->patternSerialValidation($ser->pattern, $ser->serial);
-		var_dump($err);
+		//var_dump($err);
 
 		if (!$err) {
 			$processedResponse = new ProcessedOutput(null, "failed", "Pattern and Serial doesn't match according to the convention specified", 400);
