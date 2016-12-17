@@ -4,8 +4,7 @@ namespace RS;
 
 class Serial {
 
-	public function __construct($pattern, $serial, $date) {
-		$this->pattern = $pattern;
+	public function __construct($serial, $date) {
 		$this->serial = $serial;
 		$this->date = $date;
 

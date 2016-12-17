@@ -20,13 +20,14 @@ class Converter {
 	 */
 	public function processResponse($request) {
 
-		$ser = new Serial($request->pattern, $request->serial, $request->date);
-
 		$processedResponse;
 		$formattedPattern = $this->giveMeFormatPattern($request->pattern);
 
-		$PatternConventionError = $this->error->patternSerialValidation($formattedPattern, $request->serial);
-		$dateConventionError = $this->error->dateValidationLogic($formattedPattern->date, $ser->date);
+		$formattedSerial = $this->giveMeFormatSerial($request->serial);
+
+		$PatternConventionError = $this->error->patternSerialValidation($formattedPattern, $formattedSerial->serial);
+
+		$dateConventionError = $this->error->dateValidationLogic($formattedPattern->date, $formattedSerial->date);
 
 		if (!$PatternConventionError) {
 			$processedResponse = new ProcessedOutput(null, "failed", "Pattern and Serial doesn't match according to the convention specified", 400);
@@ -35,7 +36,7 @@ class Converter {
 
 		} else {
 
-			$processedSerial = $this->processSerial($formattedPattern, $ser->serial);
+			$processedSerial = $this->processSerial($formattedPattern, $formattedSerial->serial);
 			$processedResponse = new ProcessedOutput($processedSerial, "success", "Pattern and serial convention is right", 200);
 
 		}
@@ -203,6 +204,28 @@ class Converter {
 		$postPattern = trim($pattern[1]);
 
 		return new FormattedPattern($prePattern, $postPattern, $date, $order);
+
+	}
+
+	public function giveMeFormatSerial($serialUrl) {
+
+		$date = 'not a date';
+
+		if (strpos($serialUrl, ",")) {
+
+			$serialUrl = $this->splitPrePatternWithDate($serialUrl);
+			$serial = $serialUrl[0];
+			$serial = $trim($serial);
+			$date = $serialUrl[1];
+			$date = $trim($date);
+
+		} else {
+
+			$serial = trim($serialUrl);
+
+		}
+
+		return new Serial($serial, $date);
 
 	}
 
