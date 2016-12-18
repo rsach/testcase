@@ -6,6 +6,12 @@ use RS\Serial;
 
 class Converter {
 
+	/**
+	 * { it uses dependency injection to use Error class for validation }
+	 *
+	 * @param      \RS\Error  $error  The error
+	 */
+
 	public function __construct(Error $error) {
 		$this->error = $error;
 
@@ -18,6 +24,7 @@ class Converter {
 	 *
 	 * @return     <string>  ( processed serial for controller  )
 	 */
+
 	public function processResponse($request) {
 
 		$processedResponse;
@@ -38,11 +45,12 @@ class Converter {
 	/**
 	 * { It processed the serial according to the pre and post pattern }
 	 *
-	 * @param      <string>  $pattern  The pattern
+	 * @param      <FormattedPattern>  $formattedPattern  The formattedPattern
 	 * @param      <string>  $serial   The serial
 	 *
 	 * @return     <string>  ( alter the serial according to the pre and post pattern )
 	 */
+
 	public function processSerial($formattedPattern, $serial) {
 
 		//$word = $this->splitPattern($pattern);
@@ -66,20 +74,16 @@ class Converter {
 		return $serial;
 
 	}
+
 	/**
 	 * Counts the number of special character.
 	 *
-	 * @param      <string>  $word   The word
+	 * @param      <FormattedPattern>  $formattedPattern   The formattedPattern
 	 *
 	 * @return     <array>  Number of special character of pre and post pattern.
 	 */
+
 	public function countSpecialCharacter($formattedPattern) {
-
-		// counting serial number values
-		// if (strpos($word[0], ",")) {
-		// 	$pre = $this->splitPrePatternWithDate($word[0]);
-
-		// }
 
 		$pre = $this->splitPatternWithSpecialCharacter($formattedPattern->prePattern);
 		$post = $this->splitPatternWithSpecialCharacter($formattedPattern->postPattern);
@@ -90,16 +94,18 @@ class Converter {
 		return array($countPre, $countPost);
 
 	}
+
 	/**
 	 * Calculates the offset.
 	 *
-	 * @param      <string>   $order      The order
+	 * @param      <FormattedPattern>   $formattedPattern      The formattedPattern
 	 * @param      integer  $start      The start
 	 * @param      integer  $preCount   The pre count
 	 * @param      integer  $postCount  The post count
 	 *
 	 * @return     integer  The offset.
 	 */
+
 	public function calculateOffset($formattedPattern, $start, $preCount, $postCount) {
 		$offset = $start + ($preCount - $postCount);
 
@@ -114,16 +120,18 @@ class Converter {
 		return $offset;
 
 	}
+
 	/**
 	 * { it alter the serial for the current special character of the iteration }
 	 *
 	 * @param      <array>  $serial  The serial
-	 * @param      <array>  $word    The word
+	 * @param      <FormattedPattern>  $formattedPattern    The formattedPattern
 	 * @param      <Associative array>  $count   The count
 	 * @param      <string>  $key     The key is the special character processing at a time
 	 *
 	 * @return     <array>  ( it returns the processed serial for that special character )
 	 */
+
 	public function alterSerial($serial, $formattedPattern, $count, $key) {
 
 		$hashStart = strpos($formattedPattern->prePattern, $key);
@@ -135,6 +143,7 @@ class Converter {
 		return $mod;
 
 	}
+
 	/**
 	 * Splits a pattern.
 	 *
@@ -142,11 +151,13 @@ class Converter {
 	 *
 	 * @return     <array>  ( split the pattern into pre and post )
 	 */
+
 	public function splitPattern($word) {
 
 		return preg_split("/[=>{}]+/", $word);
 
 	}
+
 	/**
 	 * Splits a pre pattern with date.
 	 *
@@ -154,10 +165,12 @@ class Converter {
 	 *
 	 * @return     <array>  ( split the pre pattern with the date)
 	 */
+
 	public function splitPrePatternWithDate($word) {
 		return preg_split('/,/', $word);
 
 	}
+
 	/**
 	 * Splits a pattern with special character.
 	 *
@@ -165,9 +178,22 @@ class Converter {
 	 *
 	 * @return     <array>  ( splits alphabets and special characters  )
 	 */
+
 	public function splitPatternWithSpecialCharacter($word) {
 		return preg_split('/(?<=[A-Z])(?=\W)/', $word);
 	}
+
+	/**
+	 * { it goes through a naivePatternValidation if it passes then it returns a string ,if not then
+	 * 	 generates an object which have formattedPattern
+	 * 	  }
+	 *
+	 * @param      <string>                   $pattern  The pattern
+	 *
+	 * @return     FormattedPattern|string  ( FormattedPattern have prePattern and postPattern ,
+	 *                                        (date and order) are optional | string generates a
+	 *                                        									'not a pattern'  )
+	 */
 
 	public function giveMeFormatPattern($pattern) {
 
@@ -177,6 +203,11 @@ class Converter {
 			return 'not a pattern';
 		}
 		$pattern = $this->splitPattern($pattern);
+
+		if (count($pattern) < 2) {
+			return 'not a pattern';
+
+		}
 		$prePattern = $pattern[0];
 		$date = 'not a date';
 		$order = 'DSC';
@@ -207,6 +238,14 @@ class Converter {
 
 	}
 
+	/**
+	 * { it's generating a serial object from a serial string  }
+	 *
+	 * @param      <string>  $serialUrl  The serial url
+	 *
+	 * @return     Serial  ( it's a serial object which have attributes like serial and date );
+	 */
+
 	public function giveMeFormatSerial($serialUrl) {
 
 		$date = 'not a date';
@@ -228,6 +267,17 @@ class Converter {
 		return new Serial($serial, $date);
 
 	}
+
+	/**
+	 * {  it will genererate a FormattedSerial and then the pattern will go through thorough validation
+	 * 	  and if it passes then it will process the serial,otherwise it will generate an error
+	 * 	  ProcessedOutput object      }
+	 *
+	 * @param      <Request>           $request           The request
+	 * @param      <FormattedPattern>           $formattedPattern  The formatted pattern
+	 *
+	 * @return     ProcessedOutput  ( it will return the processed output  )
+	 */
 
 	public function functionToCallAfterReceivingFormattedPattern($request, $formattedPattern) {
 

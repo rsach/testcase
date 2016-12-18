@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use RS\Converter;
-use RS\Serial;
 
 class SerialConverter extends Controller {
 
@@ -18,24 +17,20 @@ class SerialConverter extends Controller {
 	 *
 	 * @param      \App\Http\Requests\UrlRequest  $request  The request
 	 *
-	 * @return     <json>                         ( json response of the processedSerial according to the 																		pattern)
+	 * @return     <json>                         ( json response of the processedOutput according to the 																		pattern)
 	 */
 	public function converter(Request $request) {
 
 		// validation
 
-		$processedSerial = $this->converter->processResponse($request);
-
-		// if ($errors > 0) {
-		// 	$processedSerial = $errors;
-		// }
+		$processedOutput = $this->converter->processResponse($request);
 
 		return response()->jsend(
-			$data = $processedSerial->data,
+			$data = $processedOutput->data,
 			$presenter = null,
-			$status = $processedSerial->status,
-			$message = $processedSerial->message,
-			$code = $processedSerial->code
+			$status = $processedOutput->status,
+			$message = $processedOutput->message,
+			$code = $processedOutput->code
 		);
 
 	}

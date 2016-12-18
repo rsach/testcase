@@ -4,6 +4,16 @@ namespace RS;
 
 class Error {
 
+	/**
+	 * { it fetches the formattedPattern and serial from the conveter class and
+	 * 	 returns a boolean value for validation }
+	 *
+	 * @param      <FormattedPattern>  $formattedPattern  The formatted pattern
+	 * @param      <string>  $serial            The serial
+	 *
+	 * @return     <boolean>  ( validation value )
+	 */
+
 	public function patternSerialValidation($formattedPattern, $serial) {
 
 		//	$flag = false;
@@ -12,6 +22,17 @@ class Error {
 
 		return $flag;
 	}
+
+	/**
+	 * { it uses prepattern and serial to validate , first it checks the length of the
+	 * 	 prepattern and serial ,after it checks character by character then it returns boolean value for
+	 * 	 validation }
+	 *
+	 * @param      <string>   $prePattern  The pre pattern
+	 * @param      <string>   $serial      The serial
+	 *
+	 * @return     boolean  ( validation value for the logic )
+	 */
 
 	public function patternValidationLogic($prePattern, $serial) {
 		if (strlen($prePattern) == strlen($serial)) {
@@ -47,6 +68,15 @@ class Error {
 
 	}
 
+	/**
+	 * { it uses datePattern and date values to validate the date logic   }
+	 *
+	 * @param      <string>   $datePattern  The date pattern
+	 * @param      <string>   $date         The date
+	 *
+	 * @return     boolean  ( boolean for date validation )
+	 */
+
 	public function dateValidationLogic($datePattern, $date) {
 		$flag = false;
 		for ($i = 0; $i < strlen($date); $i++) {
@@ -59,11 +89,23 @@ class Error {
 				$flag = false;
 
 			}
+
+			if (!$flag) {
+				break;
+			}
 		}
 
 		return $flag;
 
 	}
+
+	/**
+	 * { it uses pattern to validate whether it is defined as required }
+	 *
+	 * @param      <string>  $pattern  The pattern
+	 *
+	 * @return     <boolean>  ( boolean for naivePatternLogic )
+	 */
 
 	public function naivePatternValidationLogic($pattern) {
 		return strpos($pattern, '=>');
