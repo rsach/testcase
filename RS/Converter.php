@@ -23,25 +23,11 @@ class Converter {
 		$processedResponse;
 		$formattedPattern = $this->giveMeFormatPattern($request->pattern);
 
-		$formattedSerial = $this->giveMeFormatSerial($request->serial);
-
-		//var_dump($formattedPattern);
-
-		$PatternConventionError = $this->error->patternSerialValidation($formattedPattern, $formattedSerial->serial);
-
-		$dateConventionError = $this->error->dateValidationLogic($formattedPattern->date, $formattedSerial->date);
-
-		if (!$PatternConventionError) {
-			$processedResponse = new ProcessedOutput(null, "failed", "Pattern and Serial doesn't match according to the convention specified", 400);
-
-		} else if (!$dateConventionError) {
-
-			$processedResponse = new ProcessedOutput(null, "failed", "datePattern and date convention doesn't match", 400);
+		if ($formattedPattern instanceof FormattedPattern) {
+			$processedResponse = $this->functionToCallAfterReceivingFormattedPattern($request, $formattedPattern);
 
 		} else {
-
-			$processedSerial = $this->processSerial($formattedPattern, $formattedSerial->serial);
-			$processedResponse = new ProcessedOutput($processedSerial, "success", "Pattern and serial convention is right", 200);
+			$processedResponse = new ProcessedOutput(null, "failed", "pattern is not defined as required", 400);
 
 		}
 
@@ -184,6 +170,12 @@ class Converter {
 	}
 
 	public function giveMeFormatPattern($pattern) {
+
+		$validate = $this->error->naivePatternValidationLogic($pattern);
+
+		if (!$validate) {
+			return 'not a pattern';
+		}
 		$pattern = $this->splitPattern($pattern);
 		$prePattern = $pattern[0];
 		$date = 'not a date';
@@ -234,6 +226,32 @@ class Converter {
 		}
 
 		return new Serial($serial, $date);
+
+	}
+
+	public function functionToCallAfterReceivingFormattedPattern($request, $formattedPattern) {
+
+		$formattedSerial = $this->giveMeFormatSerial($request->serial);
+
+		$PatternConventionError = $this->error->patternSerialValidation($formattedPattern, $formattedSerial->serial);
+
+		$dateConventionError = $this->error->dateValidationLogic($formattedPattern->date, $formattedSerial->date);
+
+		if (!$PatternConventionError) {
+			$processedResponse = new ProcessedOutput(null, "failed", "Pattern and Serial doesn't match according to the convention specified", 400);
+
+		} else if (!$dateConventionError) {
+
+			$processedResponse = new ProcessedOutput(null, "failed", "datePattern and date convention doesn't match", 400);
+
+		} else {
+
+			$processedSerial = $this->processSerial($formattedPattern, $formattedSerial->serial);
+			$processedResponse = new ProcessedOutput($processedSerial, "success", "Pattern and serial convention is right", 200);
+
+		}
+
+		return $processedResponse;
 
 	}
 

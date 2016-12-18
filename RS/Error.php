@@ -65,4 +65,9 @@ class Error {
 
 	}
 
+	public function naivePatternValidationLogic($pattern) {
+		return strpos($pattern, '=>');
+
+	}
+
 }
