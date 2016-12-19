@@ -3,12 +3,12 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use RS\Converter;
+use RS\ProcessOutput;
 
 class SerialConverter extends Controller {
 
-	public function __construct(Converter $converter) {
-		$this->converter = $converter;
+	public function __construct(ProcessOutput $processOutput) {
+		$this->processOutput = $processOutput;
 
 	}
 
@@ -19,11 +19,11 @@ class SerialConverter extends Controller {
 	 *
 	 * @return     <json>                         ( json response of the processedOutput according to the 																		pattern)
 	 */
-	public function converter(Request $request) {
+	public function processOutput(Request $request) {
 
 		// validation
 
-		$processedOutput = $this->converter->processResponse($request);
+		$processedOutput = $this->processOutput->processResponse($request);
 
 		return response()->jsend(
 			$data = $processedOutput->data,
